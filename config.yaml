@@ -1,0 +1,158 @@
+# Every tunable parameter lives here. Do not hardcode values in the files directly
+
+project:
+  name: "NIFTY Option Pricing Validator"
+  version: "0.1.0"
+  random_seed: 42
+
+# Paths (relative to project root)
+
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  reports_figures: "reports/figures"
+  reports_tables: "reports/tables"
+  cache: "data/cache"
+
+# Data acquisition
+
+data:
+  source: "nse_bhavcopy"
+  instrument_type_filter: "OPTIDX"   # index options only
+  underlying_symbol: "NIFTY"
+  option_types: ["CE", "PE"]
+  expiry_preference: "near_month"    # near_month | next_month | all
+
+  date_start: "2026-08-01"
+  date_end:   "2024-09-30"
+
+  manual_files: []
+
+  # Filtering rules
+  min_strike: 10000.0
+  max_strike: 30000.0
+  min_volume: 1                      # exclude zero-volume from primary
+  min_open_interest: 0               # 0 means do not filter on OI
+  min_time_to_expiry_days: 1.0
+  max_time_to_expiry_days: 120.0
+  exclude_zero_volume: true
+  exclude_duplicate_contracts: true
+  spot_matching: "same_day_close"    # same_day_close | same_day_settlement
+
+
+# Financial conventions
+
+market:
+  # Risk-free rate: continuously compounded annual rate.
+  # India 91-day T-bill is a used as a proxy
+  risk_free_rate: 0.053 # closest record on 21st Sept 2026
+  risk_free_rate_source: "RBI 91-day T-bill"
+
+  # Continuous dividend yield on NIFTY, NIFTY has historically paid roughly 1.2%.
+  # Do not silently set to zero; document the assumption.
+  dividend_yield: 0.012
+  dividend_yield_source: "historical NIFTY dividend yield approx."
+
+  # Day count convention used for time to expiry.
+  # calendar_days_365 : T = calendar_days / 365
+  # trading_days_252  : T = trading_days  / 252
+  day_count: "calendar_days_365"
+
+  # Exercise style. NIFTY index options are European.
+  exercise_style: "european"
+
+  # Settlement. NIFTY index options are cash-settled.
+  settlement: "cash"
+
+
+# Black-Scholes and CRR settings
+
+models:
+  black_scholes:
+    # Which price field to use from the market data.
+    price_field: "settlement_price"   # settlement_price | close
+    # Boundary behavior
+    min_T: 1.0e-6
+    min_sigma: 1.0e-6
+
+  crr:
+    default_steps: 500
+    convergence_steps: [10, 25, 50, 100, 250, 500, 1000, 2000]
+    american: false                   # European baseline
+
+
+# Implied volatility solver
+
+implied_vol:
+  method: "brentq"
+  lo: 1.0e-6
+  hi: 5.0                             # 500% annualized cap
+  tol: 1.0e-8
+  max_bracket_expansions: 12
+  bracket_multiplier: 2.0
+  repricing_tol: 1.0e-6               # |model - market| tolerance
+
+
+# Greeks validation (finite difference)
+
+greeks:
+  fd_bumps:
+    spot: 1.0e-4
+    vol: 1.0e-4
+    rate: 1.0e-4
+    time: 1.0e-5
+  tolerances:
+    delta: 1.0e-4
+    gamma: 1.0e-3
+    vega: 1.0e-2
+    rho: 1.0e-2
+    theta: 1.0e-2
+
+
+# Experiments
+
+experiments:
+  # Experiment 1: repricing with each option's own IV
+  iv_repricing:
+    enabled: true
+  # Experiment 2: constant ATM volatility
+  constant_atm_vol:
+    enabled: true
+    atm_rule: "closest_to_forward"    # closest_to_forward | closest_to_spot
+    moneyness_metric: "log_moneyness" # K/S | log_moneyness
+  # Experiment 3: CRR under constant ATM vol
+  crr_tree:
+    enabled: true
+    steps: 500
+
+
+# Moneyness buckets (for aggregations)
+
+moneyness_buckets:
+  # Using log-moneyness ln(K/F). Negative = ITM call / OTM put.
+  edges: [-0.30, -0.15, -0.075, -0.025, 0.025, 0.075, 0.15, 0.30]
+  labels:
+    - "deep_itm_call"
+    - "itm_call"
+    - "slight_itm_call"
+    - "atm"
+    - "slight_otm_call"
+    - "otm_call"
+    - "deep_otm_call"
+
+
+# Plotting
+
+plots:
+  dpi: 150
+  figsize: [10, 6]
+  style: "seaborn-v0_8-whitegrid"
+  palette: "deep"
+  save_format: "png"
+
+
+# Logging
+
+logging:
+  level: "INFO"                        # DEBUG | INFO | WARNING | ERROR
+  format: "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"
