@@ -176,15 +176,31 @@ Aggregated error tables are written to `reports/tables/pricing_errors_summary.cs
 
 ### Figures
 
+#### ATM Implied Volatility Term Structure
 ![ATM implied volatility term structure](docs/images/atm_iv_term_structure.png)
 
-![Pricing errors by moneyness](docs/images/pricing_errors_by_moneyness.png)
-
-![Put-call parity residuals](docs/images/parity_residuals.png)
-
+#### CRR Convergence to Black-Scholes
 ![CRR convergence to Black-Scholes](docs/images/crr_convergence.png)
 
-![Greeks validation errors](docs/images/greeks_validation_errors.png)
+#### Pricing Error by Moneyness Bucket
+![Pricing error by moneyness bucket (error_atm_iv)](docs/images/pricing_error_moneyness_bucket.png)
+
+#### Signed Pricing Error vs Log-Moneyness
+![Signed pricing error vs log-moneyness (error_atm_iv)](docs/images/signed_pricing_error_log_moneyness.png)
+
+#### Greeks Validation (Analytical vs Finite-Difference)
+![Analytical vs finite-difference delta](docs/images/greek_delta.png)
+![Analytical vs finite-difference gamma](docs/images/greek_gamma.png)
+![Analytical vs finite-difference rho](docs/images/greek_rho.png)
+![Analytical vs finite-difference theta](docs/images/greek_theta.png)
+![Analytical vs finite-difference vega](docs/images/greek_vega.png)
+
+#### Volatility Smile and Skew
+![Volatility smile / skew in log-moneyness](docs/images/volatility_smile_log_moneyness.png)
+![Implied volatility vs strike](docs/images/implied_volatility_vs_strike.png)
+
+#### Put-Call Parity Diagnostic
+![Put-call parity diagnostic (consistency check, not arbitrage)](docs/images/put_call_parity_diagnostic.png)
 
 ### Put-Call Parity
 
