@@ -174,6 +174,18 @@ Three pricing experiments are run:
 
 Aggregated error tables are written to `reports/tables/pricing_errors_summary.csv`.
 
+### Figures
+
+![ATM implied volatility term structure](docs/images/atm_iv_term_structure.png)
+
+![Pricing errors by moneyness](docs/images/pricing_errors_by_moneyness.png)
+
+![Put-call parity residuals](docs/images/parity_residuals.png)
+
+![CRR convergence to Black-Scholes](docs/images/crr_convergence.png)
+
+![Greeks validation errors](docs/images/greeks_validation_errors.png)
+
 ### Put-Call Parity
 
 Matched call/put pairs are used to compute the parity residual:
